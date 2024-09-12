@@ -8,6 +8,7 @@ class ShowIds:
     tvdb: Optional[int]
     imdb: Optional[str]
     tmdb: Optional[int]
+    tvrage: Optional[str]
 
 @dataclass
 class EpisodeProgress:
