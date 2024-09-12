@@ -86,6 +86,15 @@ class WatchedShow:
     seasons: List[Season]
 
 @dataclass
+class WatchlistShow:
+    rank: int
+    id: int
+    listed_at: str  # ISO 8601 timestamp (e.g., "2014-09-01T09:10:11.000Z")
+    notes: Optional[str]
+    type: str  # This will be "show" based on the response
+    show: Show
+
+@dataclass
 class Distribution:
     distribution: Dict[str, int]
 

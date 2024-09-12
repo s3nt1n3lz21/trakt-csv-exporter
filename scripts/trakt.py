@@ -1,7 +1,10 @@
+from typing import List, Optional
 from dotenv import load_dotenv
 import pandas as pd
 import logging
 import math
+
+from scripts.models import ShowProgress, WatchedShow
 
 load_dotenv()
 
@@ -90,32 +93,32 @@ def process_movies_data(movies):
 
     return processed_data
 
-def fetch_in_progress_shows(watched_shows):
-    in_progress_shows = []
+def fetch_in_progress_shows(watched_shows: Optional[List[WatchedShow]]):
+    in_progress_shows: Optional[List[WatchedShow]] = []
     
-    for show in watched_shows:
-        show_id = show['show']['ids']['slug']
+    for watched_show in watched_shows:
+        show_id = watched_show.show.ids.slug
         
         # Fetch progress for the show
-        progress = fetch_show_progress(show_id)
+        progress: Optional[ShowProgress] = fetch_show_progress(show_id)
         
         if progress and progress.completed < progress.aired:
-            in_progress_shows.append(show)
+            in_progress_shows.append(watched_show)
     
     return in_progress_shows
 
-def fetch_completed_shows(watched_shows):
-    completed_shows = []
+def fetch_completed_shows(watched_shows: Optional[List[WatchedShow]]):
+    completed_shows: Optional[List[WatchedShow]] = []
     
-    for show in watched_shows:
-        show_id = show['show']['ids']['slug']
+    for watched_show in watched_shows:
+        show_id = watched_show.show.ids.slug
         
         # Fetch progress for the show
         progress = fetch_show_progress(show_id)
         
         # Only add shows that are completed (i.e., all episodes watched)
         if progress and progress.completed == progress.aired:
-            completed_shows.append(show)
+            completed_shows.append(watched_show)
     
     return completed_shows
 

@@ -1,9 +1,9 @@
-from typing import Optional, Type, Union
+from typing import List, Optional, Type, Union
 import requests
 import logging
 import os
 import time
-from scripts.models import ShowProgress, ShowDetails, Ratings, Distribution, MovieProgress, WatchedMovie, WatchedShow
+from scripts.models import ShowProgress, ShowDetails, Ratings, Distribution, MovieProgress, WatchedMovie, WatchedShow, WatchlistShow
 from scripts.urls import MOVIE_RATINGS_URL, WATCHED_PROGRESS_URL, SHOW_RATINGS_URL, WATCHED_MOVIES_URL, SHOW_DETAILS_URL, WATCHED_SHOWS_URL, WATCHLIST_MOVIES_URL, WATCHLIST_SHOWS_URL
 from requests.exceptions import SSLError, Timeout, RequestException
 
@@ -23,7 +23,7 @@ headers = {
 
 url_to_type_map = {
     WATCHED_SHOWS_URL: WatchedShow,
-    WATCHLIST_SHOWS_URL: WatchedShow,  # CHECK
+    WATCHLIST_SHOWS_URL: WatchlistShow,
     WATCHED_MOVIES_URL: WatchedMovie,
     WATCHLIST_MOVIES_URL: MovieProgress,  # CHECK
     SHOW_RATINGS_URL: Ratings,
@@ -59,50 +59,44 @@ def log_error(response):
     logging.debug(f"Request Headers: {response.request.headers}")
 
 
-def fetch_trakt_data(url: str) -> Optional[Union[WatchedShow, ShowProgress, ShowDetails, Ratings, MovieProgress]]:
+def fetch_trakt_data(url: str, model_type: Type) -> Optional[Union[WatchedShow, ShowProgress, ShowDetails, Ratings, MovieProgress]]:
     """
-    Fetches data from the Trakt API and parses it into the appropriate model type based on the URL.
+    Fetches data from the Trakt API and parses it into the appropriate model type.
     """
     try:
         logging.debug(f"Fetching data from GET {url}")
         logging.debug(f"Request Headers: {headers}")
         
-        response = requests.get(url, headers=headers, timeout=10)  # Added timeout to prevent hanging
+        response = requests.get(url, headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
             
-            # Get the corresponding return type for the URL
-            model_type = get_return_type_for_url(url)
-            if model_type:
-                try:
-                    return model_type(**data)
-                except TypeError as e:
-                    logging.error(f"Error parsing data into {model_type.__name__}: {e}")
+            # If the data is a list, parse each item in the list into the model type
+            if isinstance(data, list):
+                return [model_type(**item) for item in data]
             else:
-                logging.warning(f"No return type found for URL {url}")
-                return data  # If no specific model, return raw data
-            
+                return model_type(**data)  # Parse single object
+
         elif response.status_code == 429:
             handle_rate_limit(response)
         else:
             log_error(response)
-    except SSLError as e:
-        logging.error(f"SSL error occurred while fetching data from {url}: {e}")
-    except Timeout as e:
-        logging.error(f"Request timed out while fetching data from {url}: {e}")
-    except RequestException as e:
-        logging.error(f"Request exception occurred while fetching data from {url}: {e}")
+    
+    except (SSLError, Timeout, RequestException) as e:
+        logging.error(f"Error occurred while fetching data from {url}: {e}")
+    except TypeError as e:
+        logging.error(f"Error parsing data into {model_type.__name__}: {e}")
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
 
     return None
 
-def fetch_watched_shows():
-    return fetch_trakt_data(WATCHED_SHOWS_URL)
+def fetch_watched_shows() -> Optional[List[WatchedShow]]:
+    return fetch_trakt_data(WATCHED_SHOWS_URL, WatchedShow)
 
-def fetch_watchlist_shows():
-    return fetch_trakt_data(WATCHLIST_SHOWS_URL)
+def fetch_watchlist_shows() -> Optional[List[WatchlistShow]]:
+    return fetch_trakt_data(WATCHLIST_SHOWS_URL, WatchlistShow)
 
 def fetch_watched_movies():
     return fetch_trakt_data(WATCHED_MOVIES_URL)
@@ -110,19 +104,8 @@ def fetch_watched_movies():
 def fetch_watchlist_movies():
     return fetch_trakt_data(WATCHLIST_MOVIES_URL)
 
-def fetch_show_progress(show_id: str) -> ShowProgress:
-    """
-    Fetches the progress of a show using the Trakt API and parses it into the ShowProgress object.
-    """
-    url = WATCHED_PROGRESS_URL.format(id=show_id)
-    data = fetch_trakt_data(url)
-    if data:
-        try:
-            # Parse the response JSON into the ShowProgress object
-            return ShowProgress(**data)
-        except TypeError as e:
-            logging.error(f"Error parsing show progress data: {e}")
-    return None
+def fetch_show_progress() -> Optional[ShowProgress]:
+    return fetch_trakt_data(WATCHED_PROGRESS_URL, ShowProgress)
 
 def fetch_show_details(show_id: str) -> ShowDetails:
     """
@@ -152,19 +135,19 @@ def fetch_show_ratings(show_id: str) -> Ratings:
             logging.error(f"Error parsing ratings data: {e}")
     return None
 
-def fetch_movie_progress(movie_id: str) -> MovieProgress:
-    """
-    Fetches the progress of a movie using the Trakt API and parses it into the MovieProgress object.
-    """
-    url = WATCHED_MOVIES_URL.format(id=movie_id)
-    data = fetch_trakt_data(url)
-    if data:
-        try:
-            # Parse the response JSON into the MovieProgress object
-            return MovieProgress(**data)
-        except TypeError as e:
-            logging.error(f"Error parsing movie progress data: {e}")
-    return None
+# def fetch_movie_progress(movie_id: str) -> MovieProgress:
+#     """
+#     Fetches the progress of a movie using the Trakt API and parses it into the MovieProgress object.
+#     """
+#     url = WATCHED_MOVIES_URL.format(id=movie_id)
+#     data = fetch_trakt_data(url)
+#     if data:
+#         try:
+#             # Parse the response JSON into the MovieProgress object
+#             return MovieProgress(**data)
+#         except TypeError as e:
+#             logging.error(f"Error parsing movie progress data: {e}")
+#     return None
 
 def fetch_movie_ratings(movie_id: str) -> Ratings:
     """
