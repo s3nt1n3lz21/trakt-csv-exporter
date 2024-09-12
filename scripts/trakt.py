@@ -19,20 +19,35 @@ logging.basicConfig(
 from scripts.api import fetch_watched_shows, fetch_watchlist_shows, fetch_watched_movies, fetch_watchlist_movies
 from scripts.api import fetch_show_ratings, fetch_movie_ratings, fetch_show_progress
 
-def save_to_csv(data, filename):
-    df = pd.DataFrame(data)
+def save_to_csv(data: List, filename: str):
+    # Validate if data is empty
+    if not data:
+        logging.warning(f"No data to save for {filename}. Skipping CSV generation.")
+        return
 
-    # Convert the 'Rating' column to floats, with errors='coerce' to handle non-convertible values
-    df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
+    try:
+        # Create a DataFrame from the data
+        df = pd.DataFrame(data)
 
-    # Handle NaN ratings by replacing them with a default value, e.g., 0
-    df['Rating'] = df['Rating'].fillna(0)
+        # Ensure 'Rating' column exists before processing
+        if 'Rating' in df.columns:
+            # Convert the 'Rating' column to floats, with errors='coerce' to handle non-convertible values
+            df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
 
-    # Sort by Rating after conversion
-    df = df.sort_values(by='Rating', ascending=False)
+            # Handle NaN ratings by replacing them with a default value, e.g., 0
+            df['Rating'] = df['Rating'].fillna(0)
 
-    df.to_csv(filename, index=False)
-    logging.info(f"Data saved to {filename}")
+            # Sort by Rating after conversion
+            df = df.sort_values(by='Rating', ascending=False)
+        else:
+            logging.warning(f"No 'Rating' column found in data for {filename}.")
+
+        # Save the DataFrame to CSV
+        df.to_csv(filename, index=False)
+        logging.info(f"Data saved to {filename}")
+
+    except Exception as e:
+        logging.error(f"Failed to save data to {filename}: {e}")
 
 def process_shows_data(shows):
     processed_data = []
@@ -95,6 +110,9 @@ def process_movies_data(movies):
 
 def fetch_in_progress_shows(watched_shows: Optional[List[WatchedShow]]):
     in_progress_shows: Optional[List[WatchedShow]] = []
+
+    if watched_shows is None:
+        return in_progress_shows
     
     for watched_show in watched_shows:
         show_id = watched_show.show.ids.slug
@@ -109,6 +127,9 @@ def fetch_in_progress_shows(watched_shows: Optional[List[WatchedShow]]):
 
 def fetch_completed_shows(watched_shows: Optional[List[WatchedShow]]):
     completed_shows: Optional[List[WatchedShow]] = []
+
+    if watched_shows is None:
+        return completed_shows
     
     for watched_show in watched_shows:
         show_id = watched_show.show.ids.slug
