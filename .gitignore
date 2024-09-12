@@ -1,0 +1,14 @@
+# logs
+trakt_api.log
+
+# csvs
+watched_shows.csv
+watchlist_shows.csv
+watched_movies.csv
+watchlist_movies.csv
+
+# cache
+__pycache__
+
+# env
+.env
