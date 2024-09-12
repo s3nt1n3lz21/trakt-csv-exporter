@@ -96,14 +96,10 @@ class WatchlistShow:
     show: Show
 
 @dataclass
-class Distribution:
-    distribution: Dict[str, int]
-
-@dataclass
 class Ratings:
     rating: float
     votes: int
-    distribution: Distribution
+    distribution: Dict[str, int]
 
 @dataclass
 class MovieProgress:

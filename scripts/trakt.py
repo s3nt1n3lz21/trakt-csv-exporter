@@ -7,7 +7,7 @@ import math
 
 from scripts.custom_models import ShowCSV
 from scripts.models import Show, ShowProgress, WatchedShow
-from scripts.util import combine_unique_shows
+from scripts.util import combine_unique_shows, get_shows_from_watched_shows
 
 load_dotenv()
 
@@ -55,11 +55,14 @@ def process_shows_data(shows: List[Show]):
 
             # Fetch the rating using the proper function
             ratings = fetch_show_ratings(show_id)
+            rating = None
 
             if not ratings:
                 logging.warning(f"Data might be incomplete for {title}: Release Date={release_date}")
+            else:
+                rating = ratings.rating
 
-            processed_data.append(ShowCSV(title, release_date, ratings.rating))
+            processed_data.append(ShowCSV(title, release_date, rating))
 
         except KeyError as e:
             logging.error(f"KeyError for show: {str(e)}")
@@ -150,7 +153,7 @@ if __name__ == "__main__":
     save_to_csv(processed_shows, 'watchlist_shows.csv')
 
     # Process and save completed shows to a separate CSV file
-    processed_completed_shows = process_shows_data(completed_shows)
+    processed_completed_shows = process_shows_data(get_shows_from_watched_shows(completed_shows))
     save_to_csv(processed_completed_shows, 'watched_shows.csv')
 
     # Fetch and process watched and watchlist movies

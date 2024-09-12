@@ -2,6 +2,18 @@ from typing import Dict, List
 
 from scripts.models import Show, WatchedShow, WatchlistShow
 
+def get_shows_from_watched_shows(watched_shows: List[WatchedShow]) -> List[Show]:
+    """
+    Extracts a list of Show objects from a list of WatchedShow instances.
+    """
+    return [watched_show.show for watched_show in watched_shows]
+
+def get_shows_from_watchlist_shows(watchlist_shows: List[WatchlistShow]) -> List[Show]:
+    """
+    Extracts a list of Show objects from a list of WatchlistShow instances.
+    """
+    return [watchlist_show.show for watchlist_show in watchlist_shows]
+
 def combine_unique_shows(in_progress_shows: List[WatchedShow], watchlist_shows: List[WatchlistShow]) -> List[Show]:
     """
     Combines in-progress shows and watchlist (unwatched) shows into a unique list of Show objects.

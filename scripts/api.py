@@ -1,10 +1,10 @@
 from dataclasses import fields
-from typing import List, Optional, Type, Union
+from typing import Dict, List, Optional, Type, Union
 import requests
 import logging
 import os
 import time
-from scripts.models import ShowProgress, ShowDetails, Ratings, Distribution, MovieProgress, WatchedMovie, WatchedShow, WatchlistShow
+from scripts.models import ShowProgress, ShowDetails, Ratings, MovieProgress, WatchedMovie, WatchedShow, WatchlistShow
 from scripts.urls import MOVIE_RATINGS_URL, WATCHED_PROGRESS_URL, SHOW_RATINGS_URL, WATCHED_MOVIES_URL, SHOW_DETAILS_URL, WATCHED_SHOWS_URL, WATCHLIST_MOVIES_URL, WATCHLIST_SHOWS_URL
 from requests.exceptions import SSLError, Timeout, RequestException
 
@@ -144,33 +144,19 @@ def fetch_watchlist_movies():
 def fetch_show_progress(show_id: str) -> Optional[ShowProgress]:
     return fetch_trakt_data(WATCHED_PROGRESS_URL.format(id=show_id), ShowProgress)
 
-def fetch_show_details(show_id: str) -> ShowDetails:
+def fetch_show_details(show_id: str) -> Optional[ShowDetails]:
     """
     Fetches the details of a show using the Trakt API and parses it into the Show object.
     """
     url = SHOW_DETAILS_URL.format(id=show_id)
-    data = fetch_trakt_data(url)
-    if data:
-        try:
-            # Parse the response JSON into the Show object
-            return ShowDetails(**data)
-        except TypeError as e:
-            logging.error(f"Error parsing show details: {e}")
-    return None
+    return fetch_trakt_data(url, ShowDetails)
 
-def fetch_show_ratings(show_id: str) -> Ratings:
+def fetch_show_ratings(show_id: str) -> Optional[Ratings]:
     """
     Fetches the ratings of a show using the Trakt API and parses it into the Ratings object.
     """
     url = SHOW_RATINGS_URL.format(id=show_id)
-    data = fetch_trakt_data(url)
-    if data:
-        try:
-            # Parse the response JSON into the Ratings object
-            return Ratings(**data)
-        except TypeError as e:
-            logging.error(f"Error parsing ratings data: {e}")
-    return None
+    return fetch_trakt_data(url, Ratings)
 
 # def fetch_movie_progress(movie_id: str) -> MovieProgress:
 #     """
@@ -199,7 +185,7 @@ def fetch_movie_ratings(movie_id: str) -> Ratings:
             distribution_data = data.get('distribution', {})
             
             # Create a Distribution object and populate it with the dictionary
-            distribution = Distribution(distribution=distribution_data)
+            distribution: Dict[str, int] = {}
             
             # Create and return a Ratings object, passing values to the constructor
             ratings = Ratings(
