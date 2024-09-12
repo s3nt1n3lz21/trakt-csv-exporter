@@ -35,6 +35,14 @@ def save_to_csv(data: List[Any], filename: str):
         # Create a DataFrame from the list of dictionaries
         df = pd.DataFrame(data_dicts)
 
+        # Check if 'rating' column exists and sort by it if it does
+        if 'rating' in df.columns:
+            # Convert the 'rating' column to numeric (float) if it's not already
+            df['rating'] = pd.to_numeric(df['rating'], errors='coerce')
+
+            # Sort the DataFrame by the 'rating' column in descending order (largest to smallest)
+            df = df.sort_values(by='rating', ascending=False)
+
         # Save the DataFrame to CSV with headers based on field names
         df.to_csv(filename, index=False)
         logging.info(f"Data saved to {filename}")
