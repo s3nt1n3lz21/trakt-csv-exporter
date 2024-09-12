@@ -1,4 +1,5 @@
-from typing import List, Optional
+from dataclasses import asdict
+from typing import Any, List, Optional
 from dotenv import load_dotenv
 import pandas as pd
 import logging
@@ -21,30 +22,20 @@ logging.basicConfig(
 from scripts.api import fetch_watched_shows, fetch_watchlist_shows, fetch_watched_movies, fetch_watchlist_movies
 from scripts.api import fetch_show_ratings, fetch_movie_ratings, fetch_show_progress
 
-def save_to_csv(data: List, filename: str):
+def save_to_csv(data: List[Any], filename: str):
     # Validate if data is empty
     if not data:
         logging.warning(f"No data to save for {filename}. Skipping CSV generation.")
         return
 
     try:
-        # Create a DataFrame from the data
-        df = pd.DataFrame(data)
+        # Convert list of dataclass objects to list of dictionaries
+        data_dicts = [asdict(item) for item in data]
 
-        # Ensure 'Rating' column exists before processing
-        if 'Rating' in df.columns:
-            # Convert the 'Rating' column to floats, with errors='coerce' to handle non-convertible values
-            df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
+        # Create a DataFrame from the list of dictionaries
+        df = pd.DataFrame(data_dicts)
 
-            # Handle NaN ratings by replacing them with a default value, e.g., 0
-            df['Rating'] = df['Rating'].fillna(0)
-
-            # Sort by Rating after conversion
-            df = df.sort_values(by='Rating', ascending=False)
-        else:
-            logging.warning(f"No 'Rating' column found in data for {filename}.")
-
-        # Save the DataFrame to CSV
+        # Save the DataFrame to CSV with headers based on field names
         df.to_csv(filename, index=False)
         logging.info(f"Data saved to {filename}")
 
