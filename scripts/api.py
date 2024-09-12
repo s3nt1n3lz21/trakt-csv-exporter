@@ -1,3 +1,4 @@
+from dataclasses import fields
 from typing import List, Optional, Type, Union
 import requests
 import logging
@@ -58,6 +59,34 @@ def log_error(response):
     logging.debug(f"Full Response: {response.text}")
     logging.debug(f"Request Headers: {response.request.headers}")
 
+def parse_dataclass(model_type: Type, data: Union[dict, list]) -> any:
+    """
+    Recursively parses a dictionary or list into the corresponding dataclass.
+    """
+    if isinstance(data, list):
+        return [parse_dataclass(model_type, item) for item in data]
+
+    if isinstance(data, dict):
+        # Parse each field in the dataclass
+        fieldtypes = {f.name: f.type for f in fields(model_type)}
+        parsed_data = {}
+        
+        for key, value in data.items():
+            if key in fieldtypes and is_dataclass_type(fieldtypes[key]):
+                # Recursively parse if it's another dataclass
+                parsed_data[key] = parse_dataclass(fieldtypes[key], value)
+            else:
+                parsed_data[key] = value
+
+        return model_type(**parsed_data)
+
+    return data
+
+def is_dataclass_type(tp: Type) -> bool:
+    """
+    Checks if the type is a dataclass type.
+    """
+    return hasattr(tp, '__dataclass_fields__')
 
 def fetch_trakt_data(url: str, model_type: Type) -> Optional[Union[WatchedShow, ShowProgress, ShowDetails, Ratings, MovieProgress]]:
     """
@@ -71,12 +100,12 @@ def fetch_trakt_data(url: str, model_type: Type) -> Optional[Union[WatchedShow, 
         
         if response.status_code == 200:
             data = response.json()
-            
+
             # If the data is a list, parse each item in the list into the model type
             if isinstance(data, list):
-                return [model_type(**item) for item in data]
+                return parse_dataclass(model_type, data)
             else:
-                return model_type(**data)  # Parse single object
+                return parse_dataclass(model_type, data)  # Parse single object
 
         elif response.status_code == 429:
             handle_rate_limit(response)
@@ -92,11 +121,19 @@ def fetch_trakt_data(url: str, model_type: Type) -> Optional[Union[WatchedShow, 
 
     return None
 
-def fetch_watched_shows() -> Optional[List[WatchedShow]]:
-    return fetch_trakt_data(WATCHED_SHOWS_URL, WatchedShow)
+def fetch_watched_shows() -> List[WatchedShow]:
+    watched_shows = fetch_trakt_data(WATCHED_SHOWS_URL, WatchedShow)
+    if watched_shows is None:
+        return []
+    else:
+        return watched_shows
 
-def fetch_watchlist_shows() -> Optional[List[WatchlistShow]]:
-    return fetch_trakt_data(WATCHLIST_SHOWS_URL, WatchlistShow)
+def fetch_watchlist_shows() -> List[WatchlistShow]:
+    watchlist_shows = fetch_trakt_data(WATCHLIST_SHOWS_URL, WatchlistShow)
+    if watchlist_shows is None:
+        return []
+    else:
+        return watchlist_shows 
 
 def fetch_watched_movies():
     return fetch_trakt_data(WATCHED_MOVIES_URL)
