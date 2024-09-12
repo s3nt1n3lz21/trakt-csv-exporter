@@ -4,7 +4,9 @@ import pandas as pd
 import logging
 import math
 
-from scripts.models import ShowProgress, WatchedShow
+from scripts.custom_models import ShowCSV
+from scripts.models import Show, ShowProgress, WatchedShow
+from scripts.util import combine_unique_shows
 
 load_dotenv()
 
@@ -49,16 +51,16 @@ def save_to_csv(data: List, filename: str):
     except Exception as e:
         logging.error(f"Failed to save data to {filename}: {e}")
 
-def process_shows_data(shows):
-    processed_data = []
+def process_shows_data(shows: List[Show]):
+    processed_data: List[ShowCSV] = []
 
     for show in shows:
         try:
-            title = show['show']['title']
-            show_id = show['show']['ids']['slug']
+            title = show.title
+            show_id = show.ids.slug
 
             # Use the show year as the release date
-            release_date = str(show['show']['year'])
+            release_date = str(show.year)
 
             # Fetch the rating using the proper function
             ratings = fetch_show_ratings(show_id)
@@ -66,12 +68,7 @@ def process_shows_data(shows):
             if not ratings:
                 logging.warning(f"Data might be incomplete for {title}: Release Date={release_date}")
 
-            processed_data.append({
-                'Title': title,
-                'Release Date': release_date,
-                'Seasons Watched': show['seasons'] if 'seasons' in show else 'N/A',
-                'Rating': ratings.rating
-            })
+            processed_data.append(ShowCSV(title, release_date, ratings.rating))
 
         except KeyError as e:
             logging.error(f"KeyError for show: {str(e)}")
@@ -155,7 +152,7 @@ if __name__ == "__main__":
     completed_shows = fetch_completed_shows(watched_shows)
 
     # Combine in-progress shows with watchlist shows
-    combined_shows = in_progress_shows + watchlist_shows
+    combined_shows = combine_unique_shows(in_progress_shows, watchlist_shows)
 
     # Process and save the combined list of in-progress and watchlist shows
     processed_shows = process_shows_data(combined_shows)

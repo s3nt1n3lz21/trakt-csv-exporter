@@ -141,8 +141,8 @@ def fetch_watched_movies():
 def fetch_watchlist_movies():
     return fetch_trakt_data(WATCHLIST_MOVIES_URL)
 
-def fetch_show_progress() -> Optional[ShowProgress]:
-    return fetch_trakt_data(WATCHED_PROGRESS_URL, ShowProgress)
+def fetch_show_progress(show_id: str) -> Optional[ShowProgress]:
+    return fetch_trakt_data(WATCHED_PROGRESS_URL.format(id=show_id), ShowProgress)
 
 def fetch_show_details(show_id: str) -> ShowDetails:
     """
