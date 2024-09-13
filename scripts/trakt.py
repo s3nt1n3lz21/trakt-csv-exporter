@@ -3,10 +3,9 @@ from typing import Any, List, Optional
 from dotenv import load_dotenv
 import pandas as pd
 import logging
-import math
 
-from scripts.custom_models import MovieCSV, ShowCSV
-from scripts.models import Movie, Show, ShowProgress, WatchedShow
+from scripts.models.models_csv import MovieCSV, ShowCSV
+from scripts.models.models_api import Movie, Show, ShowProgress, WatchedShow
 from scripts.util import combine_unique_shows, get_movies_from_watched_movies, get_movies_from_watchlist_movies, get_shows_from_watched_shows
 
 load_dotenv()

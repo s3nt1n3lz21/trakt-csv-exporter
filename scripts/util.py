@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from scripts.models import Movie, Show, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
+from scripts.models.models_api import Movie, Show, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
 
 def get_shows_from_watched_shows(watched_shows: List[WatchedShow]) -> List[Show]:
     """

@@ -1,10 +1,10 @@
 from dataclasses import fields
-from typing import Dict, List, Optional, Type, Union
+from typing import List, Optional, Type, Union
 import requests
 import logging
 import os
 import time
-from scripts.models import ShowProgress, ShowDetails, Ratings, MovieProgress, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
+from scripts.models.models_api import ShowProgress, ShowDetails, Ratings, MovieProgress, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
 from scripts.urls import MOVIE_RATINGS_URL, WATCHED_PROGRESS_URL, SHOW_RATINGS_URL, WATCHED_MOVIES_URL, SHOW_DETAILS_URL, WATCHED_SHOWS_URL, WATCHLIST_MOVIES_URL, WATCHLIST_SHOWS_URL
 from requests.exceptions import SSLError, Timeout, RequestException
 
@@ -26,11 +26,11 @@ url_to_type_map = {
     WATCHED_SHOWS_URL: WatchedShow,
     WATCHLIST_SHOWS_URL: WatchlistShow,
     WATCHED_MOVIES_URL: WatchedMovie,
-    WATCHLIST_MOVIES_URL: WatchlistMovie,  # CHECK
+    WATCHLIST_MOVIES_URL: WatchlistMovie,
     SHOW_RATINGS_URL: Ratings,
     MOVIE_RATINGS_URL: Ratings,
     WATCHED_PROGRESS_URL: ShowProgress,
-    SHOW_DETAILS_URL: ShowDetails # CHECK
+    SHOW_DETAILS_URL: ShowDetails
 }
 
 def get_return_type_for_url(url: str) -> Optional[Type]:
@@ -150,39 +150,25 @@ def fetch_watchlist_movies() -> List[WatchlistMovie]:
         return watchlist_movies
 
 def fetch_show_progress(show_id: str) -> Optional[ShowProgress]:
+    """
+    Fetches the completed progress of a show using the Trakt API and parses it into the ShowProgress object.
+    """
     return fetch_trakt_data(WATCHED_PROGRESS_URL.format(id=show_id), ShowProgress)
 
 def fetch_show_details(show_id: str) -> Optional[ShowDetails]:
     """
-    Fetches the details of a show using the Trakt API and parses it into the Show object.
+    Fetches the details of a show using the Trakt API and parses it into the ShowDetails object.
     """
-    url = SHOW_DETAILS_URL.format(id=show_id)
-    return fetch_trakt_data(url, ShowDetails)
+    return fetch_trakt_data(SHOW_DETAILS_URL.format(id=show_id), ShowDetails)
 
 def fetch_show_ratings(show_id: str) -> Optional[Ratings]:
     """
     Fetches the ratings of a show using the Trakt API and parses it into the Ratings object.
     """
-    url = SHOW_RATINGS_URL.format(id=show_id)
-    return fetch_trakt_data(url, Ratings)
-
-# def fetch_movie_progress(movie_id: str) -> MovieProgress:
-#     """
-#     Fetches the progress of a movie using the Trakt API and parses it into the MovieProgress object.
-#     """
-#     url = WATCHED_MOVIES_URL.format(id=movie_id)
-#     data = fetch_trakt_data(url)
-#     if data:
-#         try:
-#             # Parse the response JSON into the MovieProgress object
-#             return MovieProgress(**data)
-#         except TypeError as e:
-#             logging.error(f"Error parsing movie progress data: {e}")
-#     return None
+    return fetch_trakt_data(SHOW_RATINGS_URL.format(id=show_id), Ratings)
 
 def fetch_movie_ratings(movie_id: str) -> Optional[Ratings]:
     """
     Fetches the ratings of a movie using the Trakt API and parses it into the Ratings object.
     """
-    url = MOVIE_RATINGS_URL.format(movie_id=movie_id)
-    return fetch_trakt_data(url, Ratings)
+    return fetch_trakt_data(MOVIE_RATINGS_URL.format(movie_id=movie_id), Ratings)
