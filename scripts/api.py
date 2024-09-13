@@ -4,9 +4,10 @@ import requests
 import logging
 import os
 import time
+from requests.exceptions import SSLError, Timeout, RequestException
+
 from scripts.models.models_api import ShowProgress, ShowDetails, Ratings, MovieProgress, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
 from scripts.urls import MOVIE_RATINGS_URL, WATCHED_PROGRESS_URL, SHOW_RATINGS_URL, WATCHED_MOVIES_URL, SHOW_DETAILS_URL, WATCHED_SHOWS_URL, WATCHLIST_MOVIES_URL, WATCHLIST_SHOWS_URL
-from requests.exceptions import SSLError, Timeout, RequestException
 
 CLIENT_ID = os.getenv('TRAKT_CLIENT_ID')
 ACCESS_TOKEN = os.getenv('TRAKT_ACCESS_TOKEN')
