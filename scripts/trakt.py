@@ -5,9 +5,9 @@ import pandas as pd
 import logging
 import math
 
-from scripts.custom_models import ShowCSV
-from scripts.models import Show, ShowProgress, WatchedShow
-from scripts.util import combine_unique_shows, get_shows_from_watched_shows
+from scripts.custom_models import MovieCSV, ShowCSV
+from scripts.models import Movie, Show, ShowProgress, WatchedShow
+from scripts.util import combine_unique_shows, get_movies_from_watched_movies, get_movies_from_watchlist_movies, get_shows_from_watched_shows
 
 load_dotenv()
 
@@ -78,28 +78,27 @@ def process_shows_data(shows: List[Show]):
 
     return processed_data
 
-def process_movies_data(movies):
-    processed_data = []
+def process_movies_data(movies: List[Movie]):
+    processed_data: List[MovieCSV] = []
 
     for movie in movies:
         try:
-            title = movie['movie']['title']
-            movie_id = movie['movie']['ids']['slug']
+            title = movie.title
+            movie_id = movie.ids.slug
 
             # Use the movie year as the release date
-            release_date = str(movie['movie']['year'])
+            release_date = str(movie.year)
 
             # Fetch the rating using the proper function
             ratings = fetch_movie_ratings(movie_id)
+            rating = None
 
             if not ratings:
                 logging.warning(f"Data might be incomplete for {title}: Release Date={release_date}")
+            else:
+                rating = ratings.rating
 
-            processed_data.append({
-                'Title': title,
-                'Release Date': release_date,
-                'Rating': ratings.rating
-            })
+            processed_data.append(MovieCSV(title, release_date, rating))
 
         except KeyError as e:
             logging.error(f"KeyError for movie: {str(e)}")
@@ -168,8 +167,8 @@ if __name__ == "__main__":
     watched_movies = fetch_watched_movies()
     watchlist_movies = fetch_watchlist_movies()
 
-    processed_watched_movies = process_movies_data(watched_movies)
-    processed_watchlist_movies = process_movies_data(watchlist_movies)
+    processed_watched_movies = process_movies_data(get_movies_from_watched_movies(watched_movies))
+    processed_watchlist_movies = process_movies_data(get_movies_from_watchlist_movies(watchlist_movies))
 
     save_to_csv(processed_watched_movies, 'watched_movies.csv')
     save_to_csv(processed_watchlist_movies, 'watchlist_movies.csv')

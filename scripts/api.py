@@ -180,31 +180,9 @@ def fetch_show_ratings(show_id: str) -> Optional[Ratings]:
 #             logging.error(f"Error parsing movie progress data: {e}")
 #     return None
 
-def fetch_movie_ratings(movie_id: str) -> Ratings:
+def fetch_movie_ratings(movie_id: str) -> Optional[Ratings]:
     """
     Fetches the ratings of a movie using the Trakt API and parses it into the Ratings object.
     """
     url = MOVIE_RATINGS_URL.format(movie_id=movie_id)
-    data = fetch_trakt_data(url)
-    
-    if data:
-        try:
-            # Parse the distribution data as a dictionary
-            distribution_data = data.get('distribution', {})
-            
-            # Create a Distribution object and populate it with the dictionary
-            distribution: Dict[str, int] = {}
-            
-            # Create and return a Ratings object, passing values to the constructor
-            ratings = Ratings(
-                rating=data.get('rating', 0.0),
-                votes=data.get('votes', 0),
-                distribution=distribution
-            )
-            
-            return ratings
-        except Exception as e:
-            logging.error(f"Error parsing movie ratings data: {e}")
-    
-    return None
-
+    return fetch_trakt_data(url, Ratings)

@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from scripts.models import Show, WatchedShow, WatchlistShow
+from scripts.models import Movie, Show, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
 
 def get_shows_from_watched_shows(watched_shows: List[WatchedShow]) -> List[Show]:
     """
@@ -13,6 +13,18 @@ def get_shows_from_watchlist_shows(watchlist_shows: List[WatchlistShow]) -> List
     Extracts a list of Show objects from a list of WatchlistShow instances.
     """
     return [watchlist_show.show for watchlist_show in watchlist_shows]
+
+def get_movies_from_watched_movies(watched_movies: List[WatchedMovie]) -> List[Movie]:
+    """
+    Extracts a list of Movie objects from a list of WatchedMovie objects.
+    """
+    return [wm.movie for wm in watched_movies]
+
+def get_movies_from_watchlist_movies(watchlist_movies: List[WatchlistMovie]) -> List[Movie]:
+    """
+    Extracts a list of Movie objects from a list of WatchlistMovie objects.
+    """
+    return [wl.movie for wl in watchlist_movies]
 
 def combine_unique_shows(in_progress_shows: List[WatchedShow], watchlist_shows: List[WatchlistShow]) -> List[Show]:
     """
