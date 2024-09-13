@@ -122,14 +122,30 @@ class MovieDetails:
     votes: Optional[int]
 
 @dataclass
+class MovieIds:
+    trakt: int
+    slug: str
+    imdb: Optional[str]
+    tmdb: Optional[int]
+
+@dataclass
 class Movie:
     title: str
     year: int
-    ids: Dict[str, Optional[int]]
+    ids: MovieIds
 
 @dataclass
 class WatchedMovie:
     plays: int
     last_watched_at: Optional[str]
     last_updated_at: Optional[str]
+    movie: Movie
+
+@dataclass
+class WatchlistMovie:
+    rank: int
+    id: int
+    listed_at: str  # ISO 8601 timestamp (e.g., "2014-09-01T09:10:11.000Z")
+    notes: Optional[str]
+    type: str  # This will be "movie" based on the response
     movie: Movie

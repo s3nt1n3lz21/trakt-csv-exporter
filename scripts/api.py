@@ -4,7 +4,7 @@ import requests
 import logging
 import os
 import time
-from scripts.models import ShowProgress, ShowDetails, Ratings, MovieProgress, WatchedMovie, WatchedShow, WatchlistShow
+from scripts.models import ShowProgress, ShowDetails, Ratings, MovieProgress, WatchedMovie, WatchedShow, WatchlistMovie, WatchlistShow
 from scripts.urls import MOVIE_RATINGS_URL, WATCHED_PROGRESS_URL, SHOW_RATINGS_URL, WATCHED_MOVIES_URL, SHOW_DETAILS_URL, WATCHED_SHOWS_URL, WATCHLIST_MOVIES_URL, WATCHLIST_SHOWS_URL
 from requests.exceptions import SSLError, Timeout, RequestException
 
@@ -26,7 +26,7 @@ url_to_type_map = {
     WATCHED_SHOWS_URL: WatchedShow,
     WATCHLIST_SHOWS_URL: WatchlistShow,
     WATCHED_MOVIES_URL: WatchedMovie,
-    WATCHLIST_MOVIES_URL: MovieProgress,  # CHECK
+    WATCHLIST_MOVIES_URL: WatchlistMovie,  # CHECK
     SHOW_RATINGS_URL: Ratings,
     MOVIE_RATINGS_URL: Ratings,
     WATCHED_PROGRESS_URL: ShowProgress,
@@ -133,13 +133,21 @@ def fetch_watchlist_shows() -> List[WatchlistShow]:
     if watchlist_shows is None:
         return []
     else:
-        return watchlist_shows 
+        return watchlist_shows
 
-def fetch_watched_movies():
-    return fetch_trakt_data(WATCHED_MOVIES_URL)
+def fetch_watched_movies() -> List[WatchedMovie]:
+    watched_movies = fetch_trakt_data(WATCHED_MOVIES_URL, WatchedMovie)
+    if watched_movies is None:
+        return []
+    else:
+        return watched_movies
 
-def fetch_watchlist_movies():
-    return fetch_trakt_data(WATCHLIST_MOVIES_URL)
+def fetch_watchlist_movies() -> List[WatchlistMovie]:
+    watchlist_movies = fetch_trakt_data(WATCHLIST_MOVIES_URL, WatchlistMovie)
+    if watchlist_movies is None:
+        return []
+    else:
+        return watchlist_movies
 
 def fetch_show_progress(show_id: str) -> Optional[ShowProgress]:
     return fetch_trakt_data(WATCHED_PROGRESS_URL.format(id=show_id), ShowProgress)

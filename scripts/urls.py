@@ -272,6 +272,45 @@ WATCHED_MOVIES_URL = 'https://api.trakt.tv/sync/watched/movies'
 
 WATCHLIST_MOVIES_URL = 'https://api.trakt.tv/sync/watchlist/movies'
 
+# Response format
+
+# [
+#   {
+#     "rank": 1,
+#     "id": 101,
+#     "listed_at": "2014-09-01T09:10:11.000Z",
+#     "notes": "Need to catch up before TRON 3 is out.",
+#     "type": "movie",
+#     "movie": {
+#       "title": "TRON: Legacy",
+#       "year": 2010,
+#       "ids": {
+#         "trakt": 1,
+#         "slug": "tron-legacy-2010",
+#         "imdb": "tt1104001",
+#         "tmdb": 20526
+#       }
+#     }
+#   },
+#   {
+#     "rank": 2,
+#     "id": 102,
+#     "listed_at": "2014-09-01T09:10:11.000Z",
+#     "notes": "Really need to check out Heath Ledger's performance in this.",
+#     "type": "movie",
+#     "movie": {
+#       "title": "The Dark Knight",
+#       "year": 2008,
+#       "ids": {
+#         "trakt": 6,
+#         "slug": "the-dark-knight-2008",
+#         "imdb": "tt0468569",
+#         "tmdb": 155
+#       }
+#     }
+#   }
+# ]
+
 MOVIE_RATINGS_URL = 'https://api.trakt.tv/movies/{movie_id}/ratings'
 
 # Response format
