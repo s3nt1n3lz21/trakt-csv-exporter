@@ -11,6 +11,10 @@
 - Fetches watched and watchlist movies from Trakt.
 - Exports watched and watchlist movies to separate CSV files (`watched_movies.csv`, `watchlist_movies.csv`).
 
+## Example
+
+<img src="./example.png" alt="Example CSV Files Generated" width="600"/>
+
 ## Setup
 
 1. Clone the repository:
