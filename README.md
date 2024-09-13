@@ -15,7 +15,6 @@
 
 - Python 3.7+
 - `requests` library
-- Trakt API key
 
 ## Setup
 
@@ -30,10 +29,30 @@
     pip install -r requirements.txt
     ```
 
-3. Set up your Trakt API key by creating a `.env` file:
-    ```bash
-    TRAKT_API_KEY=your_api_key_here
-    ```
+## Environment Setup
+
+Before running the script, you'll need to configure the necessary environment variables to authenticate with the Trakt API. Create a `.env` file in the root of the project (next to the `scripts` folder) with the following content:
+
+```bash
+TRAKT_CLIENT_ID=your_client_id
+TRAKT_CLIENT_SECRET=your_client_secret
+TRAKT_AUTHORISATION_CODE=your_authorisation_code
+TRAKT_REDIRECT_URI=urn:ietf:wg:oauth:2.0:oob
+TRAKT_ACCESS_TOKEN=your_access_token
+```
+
+### Steps to Obtain Trakt API Credentials
+
+1. Go to [trakt.tv](https://trakt.tv/) and log in.
+2. Navigate to **Settings** > **Your API Apps**.
+3. Add a **New Application** to get your `TRAKT_CLIENT_ID` and `TRAKT_CLIENT_SECRET`.
+4. Set the **Redirect URI** as `urn:ietf:wg:oauth:2.0:oob`.
+5. After creating the application, you'll receive the `CLIENT_ID` and `CLIENT_SECRET` needed for the `.env` file.
+6. Use the `trakt_get_access_token.py` script to generate your `TRAKT_ACCESS_TOKEN` using your environment variables.
+
+### Getting an Access Token
+
+You need to run the `trakt_get_access_token.py` script to obtain your personal access token. This token will allow the script to access your Trakt account data. Make sure your environment variables (from the `.env` file) are set correctly before running this script.
 
 ## Usage
 
